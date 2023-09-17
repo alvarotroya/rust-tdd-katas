@@ -1,17 +1,28 @@
 // Greeting Kata to test Jetbrain's RustRover
 // Kata instructions: https://github.com/testdouble/contributing-tests/wiki/Greeting-Kata
 
-fn greet (name: Option<&str>) -> String {
-    match name {
-        None => String::from("Hello, my friend"),
-        Some(name) => {
-            if name.to_uppercase() == name {
-                return format!("HELLO {name}!");
-            }
-            return format!("Hello, {name}");
-        },
+trait Greeter {
+    fn greet(&self) -> String;
+}
+
+impl Greeter for Option<&str> {
+    fn greet(&self) -> String {
+        match self {
+            None => String::from("Hello, my friend"),
+            Some(name) => {
+                if name.to_uppercase().as_str() == *name {
+                    return format!("HELLO {name}!");
+                }
+                return format!("Hello, {name}");
+            },
+        }
     }
 }
+
+fn greet<T>(arg: T) -> String where T : Greeter {
+    arg.greet()
+}
+
 
 #[cfg(test)]
 mod test {
