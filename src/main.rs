@@ -27,7 +27,8 @@ impl Greeter for Vec<&str> {
         } else if self.len() == 2 {
             format!("Hello, {} and {}", self[0], self[1])
         } else {
-            panic!();
+            let names_as_str = &self[..self.len() - 1].join(", ");
+            format!("Hello, {}, and {}", names_as_str, self[self.len() - 1])
         }
     }
 }
@@ -61,7 +62,7 @@ mod test {
 
     // req 4
     #[test]
-    fn test_greet_multiple_names() {
+    fn test_greet_two_names() {
         assert_eq!(greet(vec!["Jill", "Jane"]), "Hello, Jill and Jane");
     }
 
@@ -73,6 +74,12 @@ mod test {
     #[test]
     fn test_greet_single_name_vec() {
         assert_eq!(greet(vec!["Jill"]), "Hello, Jill");
+    }
+
+    // req 5
+    #[test]
+    fn test_greet_multiple_names() {
+        assert_eq!(greet(vec!["Jill", "Jane", "John"]), "Hello, Jill, Jane, and John");
     }
 }
 
