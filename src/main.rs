@@ -7,25 +7,16 @@ trait Greeter {
 impl Greeter for Option<&str> {
     fn greet(&self) -> String {
         match self {
-            None => String::from("Hello, my friend"),
-            Some(name) => {
-                if is_uppercase(*name) {
-                    return format!("HELLO {name}!");
-                }
-                return format!("Hello, {name}");
-            },
+            None => greet(vec![]),
+            Some(name) => {greet(vec![*name])},
         }
     }
-}
-
-fn is_uppercase(name :&str) -> bool {
-    name.to_uppercase().as_str() == name
 }
 
 impl Greeter for Vec<&str> {
     fn greet(&self) -> String {
         if self.len() == 0 {
-            return greet(None);
+            return String::from("Hello, my friend");
         }
 
         let mut shout: Vec<&str> = Vec::new();
@@ -55,22 +46,29 @@ impl Greeter for Vec<&str> {
     }
 }
 
+fn is_uppercase(name :&str) -> bool {
+    name.to_uppercase().as_str() == name
+}
+
+
 fn _greet(names: &Vec<&str> , shout: bool) -> String {
     let mut res : String;
 
     if names.len() == 0 {
-        res = greet(None);
+        return String::from("Hello, my friend");
     } else if names.len() == 1 {
-        res = greet(Some(names[0]));
+        res = names[0].to_owned();
     } else if names.len() == 2 {
-        res = format!("Hello, {} and {}", names[0], names[1]);
+        res = format!("{} and {}", names[0], names[1]);
     } else {
         let names_as_str = &names[..names.len() - 1].join(", ");
-        res = format!("Hello, {}, and {}", names_as_str, names[names.len() - 1]);
+        res = format!("{}, and {}", names_as_str, names[names.len() - 1]);
     }
 
-    if shout{
-        res = res.to_uppercase();
+    if shout {
+        res = format!("HELLO {}!", res.to_uppercase());
+    } else {
+        res = format!("Hello, {}", res);
     }
     res
 }
@@ -99,7 +97,7 @@ mod test {
     // req 3
     #[test]
     fn test_greet_shouts_single_name() {
-        assert_eq!(greet(Some("JERRY")), "HELLO JERRY!");
+        assert_eq!(greet(vec!["JERRY"]), "HELLO JERRY!");
     }
 
     // req 4
@@ -126,8 +124,12 @@ mod test {
 
     // req 6
     #[test]
-    fn test_greet_and_shout() {
+    fn test_greet_twice_and_shout_once() {
         assert_eq!(greet(vec!["Jill", "BRIAN", "John"]), "Hello, Jill and John. AND HELLO BRIAN!");
+    }
+    #[test]
+    fn test_greet_once_shout_twice() {
+        assert_eq!(greet(vec!["Jill", "BRIAN", "JOHN"]), "Hello, Jill. AND HELLO BRIAN AND JOHN!");
     }
 }
 
