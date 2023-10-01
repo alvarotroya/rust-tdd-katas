@@ -11,7 +11,11 @@ trait Greeter {
 
 impl Greeter for &str {
     fn greet(&self) -> String {
-        greet(vec![*self])
+        if self.len() == 0 {
+           String::from("Hello, my friend")
+        } else {
+            greet(vec![*self])
+        }
     }
 }
 
@@ -21,46 +25,42 @@ impl Greeter for Vec<&str> {
             return String::from("Hello, my friend");
         }
 
-        let (shout, greet) = split_by_caps(self.clone()); // clone self here to avoid having to deal with lifetimes
+        let (shout, greet) = _split_by_caps(self.clone()); // clone self here to avoid having to deal with lifetimes
 
         let greet_str = _greet(&greet, false);
         let shout_str = _greet(&shout, true);
 
-        // combine both greetings together
-        let mut res = String::from("");
         if greet.len() == 0 {
-            return shout_str;
+            shout_str
+        } else if shout.len() == 0 {
+            greet_str
         } else {
-            res.push_str(&greet_str);
+            format!("{greet_str}. AND {shout_str}")
         }
-        if shout.len() > 0 {
-            res.push_str(&format!(". AND {shout_str}"));
-        }
-        res
     }
 }
 
-fn split_by_caps(names: Vec<&str>) -> (Vec<&str>, Vec<&str>) {
+fn _split_by_caps(names: Vec<&str>) -> (Vec<&str>, Vec<&str>) {
     let mut shout: Vec<&str> = Vec::new();
     let mut greet: Vec<&str> = Vec::new();
 
     for &name in names.iter() {
-        if is_uppercase(name) {
-            shout.push(name)
+        if name.len() == 0 {
+            continue
+        }
+
+        if name == name.to_uppercase().as_str() {
+            shout.push(name.clone())
         } else {
-            greet.push(name)
+            greet.push(name.clone())
         }
     }
     (shout, greet)
 }
 
-fn is_uppercase(name: &str) -> bool {
-    name.to_uppercase().as_str() == name
-}
-
 
 fn _greet(names: &Vec<&str>, shout: bool) -> String {
-    let mut res = match names.len() {
+    let res = match names.len() {
         0 => String::from("Hello, my friend"),
         1 => names[0].to_owned(),
         2 => format!("{} and {}", names[0], names[1]),
@@ -68,11 +68,10 @@ fn _greet(names: &Vec<&str>, shout: bool) -> String {
     };
 
     if shout {
-        res = format!("HELLO {}!", res.to_uppercase());
+        format!("HELLO {}!", res.to_uppercase())
     } else {
-        res = format!("Hello, {}", res);
+        format!("Hello, {}", res)
     }
-    res
 }
 
 #[cfg(test)]
@@ -83,6 +82,11 @@ mod test {
     #[test]
     fn test_greet_single_name() {
         assert_eq!(greet("Bob"), "Hello, Bob");
+    }
+
+    #[test]
+    fn test_greet_single_empty_name() {
+        assert_eq!(greet(""), "Hello, my friend");
     }
 
     // req 2
@@ -110,10 +114,20 @@ mod test {
         assert_eq!(greet(vec!["Jill"]), "Hello, Jill");
     }
 
+    #[test]
+    fn test_greet_single_name_and_empty_name_vec() {
+        assert_eq!(greet(vec!["Jill", ""]), "Hello, Jill");
+    }
+
     // req 5
     #[test]
     fn test_greet_multiple_names() {
         assert_eq!(greet(vec!["Jill", "Jane", "John"]), "Hello, Jill, Jane, and John");
+    }
+
+    #[test]
+    fn test_greet_multiple_names_and_empty_name() {
+        assert_eq!(greet(vec!["Jill", "Jane", "John", ""]), "Hello, Jill, Jane, and John");
     }
 
     // req 6
