@@ -9,6 +9,12 @@ trait Greeter {
     fn greet(&self) -> String;
 }
 
+impl Greeter for Option<&str> {
+    fn greet(&self) -> String {
+        greet(self.unwrap_or(""))
+    }
+}
+
 impl Greeter for &str {
     fn greet(&self) -> String {
         if self.len() == 0 {
@@ -46,7 +52,7 @@ fn _split_by_caps(names: Vec<&str>) -> (Vec<&str>, Vec<&str>) {
 
     for &name in names.iter() {
         if name.len() == 0 {
-            continue
+            continue // skip empty strings as they are considered uppercase otherwise
         }
 
         if name == name.to_uppercase().as_str() {
@@ -90,7 +96,15 @@ mod test {
     }
 
     // req 2
-    // see test_greet_empty_name_vec, keeping the comment for future reference
+    #[test]
+    fn test_greet_optional_none_name() {
+        assert_eq!(greet(None), "Hello, my friend");
+    }
+
+    #[test]
+    fn test_greet_optional_some_name() {
+        assert_eq!(greet(Some("Max")), "Hello, Max");
+    }
 
     // req 3
     #[test]
